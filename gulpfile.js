@@ -1,4 +1,5 @@
 var gulp = require("gulp");
+
 /*---- plugins ----*/
 var sass = require("gulp-sass");
 var concat = require("gulp-concat");
@@ -9,6 +10,8 @@ var autoprefixer = require("gulp-autoprefixer");
 var notify = require("gulp-notify");
 var browserSync = require("browser-sync").create();
 var eslint = require("gulp-eslint");
+var scsslint = require("gulp-scss-lint");
+
 
 /*---- constants ----*/
 var JS_DISTRIBUTION_FOLDER = "./dist/js";
@@ -31,6 +34,21 @@ gulp.task("browser-sync", ["styles"], function() {
     });
 });
 
+gulp.task("scripts", function() {
+    var sequentialJS = THIRD_PARTY_JS.concat(CUSTOM_JS);
+    return gulp.src(sequentialJS)
+       .pipe(concat("app.js"))
+       .pipe(gulp.dest(JS_DISTRIBUTION_FOLDER))
+       .pipe(rename("app.min.js"))
+       .pipe(uglify({
+           mangle: true
+       }))
+       .pipe(gulp.dest(JS_DISTRIBUTION_FOLDER))
+       .pipe(notify({
+           message: "app.min.js is ready!"
+       }));
+});
+
 gulp.task("styles", function() {
     var sequentialCSS = THIRD_PARTY_CSS.concat(CUSTOM_CSS);
     return gulp.src(sequentialCSS)
@@ -50,35 +68,8 @@ gulp.task("styles", function() {
        }));
 });
 
-gulp.task("watch", ["browser-sync"], function() {
-    gulp.watch("./src/scss/**/*.scss", ["styles"]).on("change", browserSync.reload);
-    gulp.watch("./src/js/**/*.js", [["lint"],"scripts"]).on("change", browserSync.reload);
-    gulp.watch("*.html").on("change", browserSync.reload);
-});
-
-gulp.task("scripts", function() {
-    var sequentialJS = THIRD_PARTY_JS.concat(CUSTOM_JS);
-    return gulp.src(sequentialJS)
-       .pipe(concat("app.js"))
-       .pipe(gulp.dest(JS_DISTRIBUTION_FOLDER))
-       .pipe(rename("app.min.js"))
-       .pipe(uglify({
-           mangle: true
-       }))
-       .pipe(gulp.dest(JS_DISTRIBUTION_FOLDER))
-       .pipe(notify({
-           message: "app.min.js is ready!"
-       }));
-});
-
-gulp.task("lint", function() {
-    // ESLint ignores files with "node_modules" paths.
-    // So, it's best to have gulp ignore the directory as well.
-    // Also, Be sure to return the stream from the task;
-    // Otherwise, the task may end before the stream has finished.
+gulp.task("js-lint", function() {
     return gulp.src(["./src/js/**/*.js","!node_modules/**"])
-        // eslint() attaches the lint output to the "eslint" property
-        // of the file object so it can be used by other modules.
         .pipe(eslint())
         // eslint.format() outputs the lint results to the console.
         // Alternatively use eslint.formatEach() (see Docs).
@@ -88,4 +79,15 @@ gulp.task("lint", function() {
         //.pipe(eslint.failAfterError());
 });
 
-gulp.task("default", ["styles", "scripts", "watch"]);
+gulp.task("scss-lint", function() {
+    return gulp.src("./src/scss/*.scss")
+    .pipe(scsslint());
+});
+
+gulp.task("watch", ["browser-sync"], function() {
+    gulp.watch("./src/scss/**/*.scss", ["scss-lint","styles"]).on("change", browserSync.reload);
+    gulp.watch("./src/js/**/*.js", [["js-lint"],"scripts"]).on("change", browserSync.reload);
+    gulp.watch("*.html").on("change", browserSync.reload);
+});
+
+gulp.task("default", ["scripts", "styles", "js-lint", "scss-lint",  "watch"]);
