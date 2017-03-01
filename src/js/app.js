@@ -5,7 +5,7 @@ var App = (function() {
 
     var _testESLint = function() {
         var a = 2;
-        return a * b;
+        return a * b * C;
     };
 
     return {
