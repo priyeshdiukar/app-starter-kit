@@ -6,6 +6,7 @@ It helps you kickstart new project with ease , prescribing best practices and to
 * [Tools](#tools)
 * [Dependencies](#dependencies)
 * [Installation](#installation)
+* [Upcoming Features](#upcomingfeatures)
 
 ## Tools <a name="tools"></a>
 
@@ -63,3 +64,6 @@ cd app-starter-kit
 npm install
 npm run gulp
 ```
+## Upcoming features <a name="upcomingfeatures"></a>
+* Custom scss lint config.
+* Git pre-commit and post-commit hooks.
