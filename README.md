@@ -62,7 +62,7 @@ Then proceed with the following:
 git clone https://github.com/priyeshdiukar/app-starter-kit.git
 cd app-starter-kit
 npm install
-npm run gulp
+npm run start-dev
 ```
 ## Upcoming features <a name="upcomingfeatures"></a>
 * custom scss lint config.
