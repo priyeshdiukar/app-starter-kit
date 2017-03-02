@@ -28,9 +28,7 @@
     "gulp-uglify": "^2.0.1"
   },
   "scripts": {
-    "gulp": "./node_modules/gulp/bin/gulp.js",
-    "gulp-lint": "npm run gulp js-lint",
-    "gulp-sass-lint": "npm run gulp scss-lint",
+    "start-dev": "./node_modules/.bin/gulp",
     "test": "echo \"Error: no test specified\" && exit 1"
   }
 }

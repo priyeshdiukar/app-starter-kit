@@ -9,23 +9,25 @@ var rename = require("gulp-rename");
 var autoprefixer = require("gulp-autoprefixer");
 var notify = require("gulp-notify");
 var browserSync = require("browser-sync").create();
+var reload = browserSync.reload;
 var eslint = require("gulp-eslint");
 var scsslint = require("gulp-scss-lint");
 
+/*---- Routes ----*/
+var routes = {
+    jsDistribution: "./dist/js",
+    cssDistribution: "./dist/css",
+    vendorCss: [
+    /*Example*/  //  './node_modules/owl.carousel/dist/assets/owl.carousel.min.css'
+    ],
+    customCss: ["./src/scss/app.scss"],
+    vendorJs : [
+    /*Example*/ //'./node_modules/jquery/dist/jquery.min.js'
+    ],
+    customJs: ["./src/js/**/*.js"]
+};
 
-/*---- constants ----*/
-var JS_DISTRIBUTION_FOLDER = "./dist/js";
-var CSS_DISTRIBUTION_FOLDER = "./dist/css";
-var THIRD_PARTY_CSS = [
-  /*Example*/  //  './node_modules/owl.carousel/dist/assets/owl.carousel.min.css'
-];
-var CUSTOM_CSS = ["./src/scss/app.scss"];
-var THIRD_PARTY_JS = [
-  /*Example*/ //'./node_modules/jquery/dist/jquery.min.js'
-];
-var CUSTOM_JS = ["./src/js/**/*.js"];
-
-gulp.task("browser-sync", ["styles"], function() {
+gulp.task("serve", ["styles"], function() {
     browserSync.init({
         server: {
             injectChanges: true,
@@ -34,23 +36,29 @@ gulp.task("browser-sync", ["styles"], function() {
     });
 });
 
+gulp.task("watch", ["serve"], function() {
+    gulp.watch("./src/scss/**/*.scss", ["scss-lint","styles"]);
+    gulp.watch("./src/js/**/*.js", [["js-lint"],"scripts"]).on("change", reload);
+    gulp.watch("*.html").on("change", reload);
+});
+
 gulp.task("scripts", function() {
-    var sequentialJS = THIRD_PARTY_JS.concat(CUSTOM_JS);
+    var sequentialJS = routes.vendorJs.concat(routes.customJs);
     return gulp.src(sequentialJS)
        .pipe(concat("app.js"))
-       .pipe(gulp.dest(JS_DISTRIBUTION_FOLDER))
+       .pipe(gulp.dest(routes.jsDistribution))
        .pipe(rename("app.min.js"))
        .pipe(uglify({
            mangle: true
        }))
-       .pipe(gulp.dest(JS_DISTRIBUTION_FOLDER))
+       .pipe(gulp.dest(routes.jsDistribution))
        .pipe(notify({
            message: "app.min.js is ready!"
        }));
 });
 
 gulp.task("styles", function() {
-    var sequentialCSS = THIRD_PARTY_CSS.concat(CUSTOM_CSS);
+    var sequentialCSS = routes.vendorCss.concat(routes.customCss);
     return gulp.src(sequentialCSS)
        .pipe(sass().on("error", sass.logError))
        .pipe(concat("app.css"))
@@ -58,10 +66,10 @@ gulp.task("styles", function() {
            browsers: ["> 1%", "iOS 7", "ie >= 10"],
            cascade: false
        }))
-       .pipe(gulp.dest(CSS_DISTRIBUTION_FOLDER))
+       .pipe(gulp.dest(routes.cssDistribution))
        .pipe(rename("app.min.css"))
        .pipe(cssnano())
-       .pipe(gulp.dest(CSS_DISTRIBUTION_FOLDER))
+       .pipe(gulp.dest(routes.cssDistribution))
        .pipe(browserSync.reload({stream: true}))
        .pipe(notify({
            message: "app.min.css is ready!"
@@ -82,12 +90,6 @@ gulp.task("js-lint", function() {
 gulp.task("scss-lint", function() {
     return gulp.src("./src/scss/*.scss")
     .pipe(scsslint());
-});
-
-gulp.task("watch", ["browser-sync"], function() {
-    gulp.watch("./src/scss/**/*.scss", ["scss-lint","styles"]).on("change", browserSync.reload);
-    gulp.watch("./src/js/**/*.js", [["js-lint"],"scripts"]).on("change", browserSync.reload);
-    gulp.watch("*.html").on("change", browserSync.reload);
 });
 
 gulp.task("default", ["scripts", "styles", "js-lint", "scss-lint",  "watch"]);
