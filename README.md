@@ -65,5 +65,7 @@ npm install
 npm run gulp
 ```
 ## Upcoming features <a name="upcomingfeatures"></a>
-* Custom scss lint config.
-* Git pre-commit and post-commit hooks.
+* custom scss lint config.
+* git pre-commit and post-commit hooks.
+* unit testing framework integration.
+* app-starter-kit2 (A complete rewrite, based on babel and webpack to support ECMAScript 6 development.)
