@@ -53,7 +53,7 @@ You can run it manually from the command line, or integrate it into your SCM hoo
 For gulp-scss-lint to work requires following dependencies on your system.
 ```bash
 sudo apt-get install ruby
-gem install scss_lint
+sudo gem install scss_lint
 ```
 ```bash
 npm install
